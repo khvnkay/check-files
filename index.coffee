@@ -26,7 +26,6 @@ module.exports =
     
 
     fs.readdir folder, (err, files) ->
-
       _.each files, (file) ->
         match =  input_rgx.exec(file) or output_rgx.exec(file) or  dumdb_rgx.exec(file)
         if match != null
