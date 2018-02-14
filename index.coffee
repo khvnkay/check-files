@@ -9,12 +9,19 @@ input_rgx   = /input_(.*).tgz/
 output_rgx  = /output_(.*).tgz/
 holiday     = __dirname+ '/holidays.csv'
 
-
+pathFolder = __dirname + "/backup/archived/trinity/"
 folders   = ["db_dump", "input", "output"]
-range     = ["20140101", "20161230" ]
+range     = ["20140101", "20201230" ]
 arr       = []
+
+create_log = (text, file)->
+  content =  text + ": " + file + '\n'
+  fs.appendFile "log.txt", content , (err) ->
+    if err 
+      throw err
+
 _.each folders,(fd) ->
-  path =  __dirname + '/' + fd + '/' 
+  path =  pathFolder + fd + '/' 
   fs.readdir path, (err, file) ->
     _.each file, (f)->
       match =  input_rgx.exec(f) or output_rgx.exec(f) or  dumdb_rgx.exec(f)
@@ -23,23 +30,23 @@ _.each folders,(fd) ->
        #  # not saturday sunday
         if !(date ==   '6' || date ==  '0') 
           if moment(match[1]).isAfter(range[0]) and moment(match[1]).isBefore(range[1])
-            console.log f
-            # csv
-            #   .fromPath(holiday)
-            #   .transform (data) ->
-            #     moment(data[7]).format("YYYYMMDD")
-            #   .on "data",(data)->
-            #     unless (data == match[1])
-            #       arr.push match[0]
-            #   .on "end", () ->
-            #     sort =  _.sortedUniq arr
-            #     console.log "done\n",sort
+            csv
+              .fromPath(holiday)
+              .transform (data) ->
+                moment(data[7]).format("YYYYMMDD")
+              .on "data",(data)->
+                unless (data == match[1])
+                  arr.push match[1]
+              .on "end", () ->
+                sort =  _.uniq arr
+                if sort.length 
+                  content = "total : " + sort.length + " of folder  " + folders + '\n'
+                  console.log content , sort
+                  process.exit()
+          else
+            create_log("range time is incorrect ", match[0])
+        else
+          create_log("file is saturday or sunday ", match[0])
+      else 
+        create_log("file name is incorrect ",f)
 
-a = [1,2,3,4,5,5]
-csv
-  .fromPath(holiday)
-  .on "data",(data)->
-    _.each a , (o)->
-      console.log data[6],data[7]
-  .on "end", () ->
-    console.log "done\n"

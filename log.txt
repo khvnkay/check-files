@@ -1,0 +1,2 @@
+folder  file is incorrect : www.db
+folder file is saturday or sunday : input_20180120.tgz
