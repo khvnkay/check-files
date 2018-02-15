@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "async": "^2.6.0",
     "bluebird": "^3.5.1",
     "chai": "^4.1.2",
     "coffeescript": "^2.1.1",
@@ -19,6 +20,9 @@
     "lodash": "^4.17.4",
     "mocha": "^5.0.0",
     "moment": "^2.20.1",
+    "moment-iterator": "^1.0.8",
+    "moment-range": "^3.1.1",
+    "promise": "^8.0.1",
     "tar": "^4.3.2"
   }
 }

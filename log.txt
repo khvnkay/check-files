@@ -1,2 +1,65 @@
-folder  file is incorrect : www.db
-folder file is saturday or sunday : input_20180120.tgz
+_               = require 'lodash'
+fs              = require 'fs'
+moment          = require 'moment'
+Promise          = require 'bluebird'
+csv             = require "fast-csv" 
+momentIterator  = require 'moment-iterator'
+console.log "Hello World"
+dumdb_rgx   = /aboss_.*_(.*).db/
+input_rgx   = /input_(.*).tgz/
+output_rgx  = /output_(.*).tgz/
+holiday     = __dirname+ '/holidays.csv'
+
+pathFolder = __dirname + "/backup/archived/trinity/"
+folders   = ["db_dump", "input", "output"]
+arr       = []
+narr      = []
+create_log = (text, file)->
+  content =  text + ": " + file + '\n'
+  fs.appendFile "log_check_files.txt", content , (err) ->
+    if err 
+      throw err
+arrdate = []
+start = new Date(2018, 3, 1)
+end = new Date(2018, 3, 30)
+aa = []
+
+_.each folders,(fd) ->
+  path =  pathFolder + fd + '/' 
+  fs.readdir path, (err, file) ->
+    _.each file, (f)->
+      match =  input_rgx.exec(f) or output_rgx.exec(f) or  dumdb_rgx.exec(f)
+      if match != null
+        date = moment(match[1]).format("e")
+        momentIterator(start, end).each 'days', (d) ->
+          if d.format('e') != '0' && d.format('e') != '6'
+            arrdate.push d.format('YYYYMMDD')
+            csv
+              .fromPath(holiday)
+              .transform (data) ->
+                moment(data[7]).format("YYYYMMDD")
+              .on "data",(data)->
+                if d.format('YYYYMMDD') == data
+                  arr.push match[1]
+                else
+                  if match[1] == d.format('YYYYMMDD')
+                    narr.push match[1]
+                  else
+                    aa.push match[1]
+
+
+              .on "end", () ->
+                sort =  _.uniq arr
+                nsort =  _.uniq narr
+                # console.log nsort,"-------"
+                console.log _.uniq aa
+
+                # console.log sort,";====;"
+                # content = "total : " + sort.length + " of folder  " + folders + '\n'
+                # console.log content , nsort,"pppp"
+                # process.exit()
+
+      else 
+        create_log("file name is incorrect ",f)
+
+
